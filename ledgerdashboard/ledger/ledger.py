@@ -13,7 +13,7 @@ class Ledger:
 
     @classmethod
     def new(cls, filename):
-        return Ledger(sh.Command(settings.LEDGER_BIN).bake(no_color=True, file=filename), filename=filename)
+        return Ledger(sh.Command(settings.LEDGER_BIN).bake(_tty_out=False, no_color=True, file=filename), filename=filename)
 
     def accounts(self, account_filter=""):
         result = self.ledger.accounts(account_filter)
@@ -34,6 +34,7 @@ class Ledger:
         for balance in balance_output.strip().split("\n"):
             if not balance:
                 continue
+            print("Balance: " + balance)
             match = pattern.search(balance)
             balances.append((match.group(1), match.group(2), float(match.group(3))))
 
