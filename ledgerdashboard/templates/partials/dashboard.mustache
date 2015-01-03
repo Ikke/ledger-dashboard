@@ -1,0 +1,162 @@
+<div class="row">
+    <div class="col-md-3">
+        <h2>Accounts</h2>
+        <table id="balance" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Account</th>
+                    <th>Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#accounts}}
+                <tr>
+                    <td>{{{name}}}</td>
+                    <td class="amount">{{balance}}</td>
+                </tr>
+                {{/accounts}}
+            </tbody>
+        </table>
+
+        <h2>Income this month</h2>
+        <table id="income" class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>Payed By</th>
+                <th>Amount</th>
+            </tr>
+            </thead>
+            <tbody>
+                {{#income}}
+                <tr>
+                    <td>{{{name}}}</td>
+                    <td class="amount">{{balance}}</td>
+                </tr>
+                {{/income}}
+            </tbody>
+        </table>
+
+        <h2>Liabilities</h2>
+        <table id="balance" class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>Account</th>
+                <th>Balance</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#debts}}
+                <tr>
+                    <td>{{{name}}}</td>
+                    <td class="amount negative">{{balance}}</td>
+                </tr>
+            {{/debts}}
+            </tbody>
+        </table>
+
+        <h2>Cash flow</h2>
+        <table id="cashflow" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            {{#cash_flow}}
+                <tr>
+                    <td>{{month}}</td>
+                    <td class="amount {{type}}">{{amount}}</td>
+                </tr>
+            {{/cash_flow}}
+        </table>
+    </div>
+
+    <div class="col-md-4">
+        <h2>Expenses this month</h2>
+        {{#expenses_present}}
+        <table id="budget" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Account</th>
+                    <th>Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#expense_balances}}
+                <tr>
+                    <td>{{#first}}<strong>{{/first}}{{{name}}}{{#first}}</strong>{{/first}}</td>
+                    <td class="amount">{{#first}}<strong>{{/first}}{{balance}}{{#first}}</strong>{{/first}}</td>
+                </tr>
+                {{/expense_balances}}
+            </tbody>
+        </table>
+        {{/expenses_present}}
+        {{^expenses_present}}
+            <div class="alert alert-info"> No expenses yet for this month</div>
+        {{/expenses_present}}
+        <h2>Expenses previous month</h2>
+        <table id="expenses_previous_month" class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>Account</th>
+                <th>Balance</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#expenses_previous_month}}
+                <tr>
+                    <td>{{#first}}<strong>{{/first}}{{{name}}}{{#first}}</strong>{{/first}}</td>
+                    <td class="amount">{{#first}}<strong>{{/first}}{{balance}}{{#first}}</strong>{{/first}}</td>
+                </tr>
+            {{/expenses_previous_month}}
+            </tbody>
+        </table>
+    </div>
+    <div class="col-md-4">
+        <h2>Recent expenses</h2>
+        <table id="budget" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{#last_expenses}}
+                <tr>
+                    <td>{{payee}}{{#note}} ({{note}}){{/note}}</td>
+                    <td class="amount">{{amount}}</td>
+                </tr>
+            {{/last_expenses}}
+            </tbody>
+        </table>
+
+        <h2>Near recurring expenses</h2>
+        <table id="recurring_expenses" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Amount</th>
+                    <th>Due in about</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#recurring_transactions}}
+                    <tr>
+                        <td>{{payee}}</td>
+                        <td class="amount">{{amount}}</td>
+                        <td>{{due_in}} days</td>
+                    </tr>
+                {{/recurring_transactions}}
+                <tr>
+                    <td>
+                        <strong>Total:</strong>
+                    </td>
+                    <td class="amount"><strong>{{recurring_transactions_total}}</strong></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+

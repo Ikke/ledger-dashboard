@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{title}}</title>
+        <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-theme.min.css"/>
+        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.2/themes/ui-lightness/jquery-ui.css"/>
+
+        <style>
+            .amount {
+                white-space: pre;
+                font-family: monospace;
+            }
+            .negative {
+                color: #ff0000;
+            }
+            .positive {
+                color: #00aa00;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+        <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">Ledger-dashboard</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li class="{{dashboard}}"><a href="/">Home</a></li>
+                        <li class="{{expenses}}"><a href="/expenses">Expenses</a></li>
+                    </ul>
+                </div><!--/.nav-collapse -->
+            </div>
+        </div>
+
+        <div class="container" style="padding-top: 70px;">
+            {{>content}}
+        </div><!-- /.container -->
+
+        <script src="https://code.jquery.com/ui/1.11.2/jquery-ui.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+    </body>
+</html>
