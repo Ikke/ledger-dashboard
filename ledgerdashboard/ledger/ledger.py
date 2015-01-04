@@ -36,7 +36,8 @@ class Ledger:
                 continue
             print("Balance: " + balance)
             match = pattern.search(balance)
-            balances.append((match.group(1), match.group(2), float(match.group(3))))
+            if match:
+                balances.append((match.group(1), match.group(2), float(match.group(3))))
 
         return balances
 
