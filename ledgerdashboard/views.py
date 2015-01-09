@@ -25,28 +25,32 @@ def index():
 
     layout.accounts = [
         {"name": format_account(account), 'balance': format_amount(balance)}
-        for account, cur, balance in l.balance(accounts=s.ASSET_ACCOUNTS)
+        for account, cur, balance in l.balance(accounts=s.Accounts.ASSETS_P)
     ]
 
     layout.debts = [
         {"name": format_account(account), 'balance': format_amount(float(balance) * -1)}
-        for account, cur, balance in l.balance(accounts=s.LIABILITIES)
+        for account, cur, balance in l.balance(accounts=s.Accounts.LIABILITIES_P)
     ]
 
     layout.expense_balances = [
-        {"name": format_account(account), 'balance': format_amount(balance), "first": account == s.EXPENSE_ACCOUNTS}
+        {
+            "name": format_account(account),
+            'balance': format_amount(balance),
+            "first": account == s.Accounts.LIABILITIES_P
+        }
         for account, cur, balance
-        in l.balance(accounts=s.EXPENSE_ACCOUNTS, limit="date >= [this month]")
+        in l.balance(accounts=s.Accounts.LIABILITIES_P, limit="date >= [this month]")
     ]
 
     layout.expenses_previous_month = [
         {"name": format_account(account), 'balance': format_amount(balance), "first": ":" not in account}
         for account, cur, balance
-        in l.balance(accounts=s.EXPENSE_ACCOUNTS, limit="date >= [last month] and date < [this month]")
+        in l.balance(accounts=s.Accounts.LIABILITIES_P, limit="date >= [last month] and date < [this month]")
     ]
 
     recurring_income = ledger.regular_transactions(
-        l.register(accounts=s.INCOME_ACCOUNTS)
+        l.register(accounts=s.Accounts.INCOME_P)
     )
 
     layout.income = [
@@ -58,11 +62,11 @@ def index():
     layout.last_expenses = [
         {'payee': txn['payee'], 'note': txn['note'], 'amount': format_amount(txn['amount'])}
         for txn
-        in l.register(accounts=s.EXPENSE_ACCOUNTS)[:-15:-1]
+        in l.register(accounts=s.Accounts.LIABILITIES_P)[:-15:-1]
     ]
 
-    recurring_transactions = ledger.regular_transactions(l.register(accounts=s.EXPENSE_ACCOUNTS))
-    transactions_this_month = l.register(accounts=s.EXPENSE_ACCOUNTS, limit='date >= [this month]')
+    recurring_transactions = ledger.regular_transactions(l.register(accounts=s.Accounts.LIABILITIES_P))
+    transactions_this_month = l.register(accounts=s.Accounts.LIABILITIES_P, limit='date >= [this month]')
 
     for txn in recurring_transactions:
         txn['date'] = datetime.datetime.strptime(txn['date'], '%Y/%m/%d')
@@ -100,7 +104,7 @@ def index():
 
         # print(start_month_nr, start_year, end_month_nr, end_year)
         result = l.register(
-            accounts=" ".join([s.EXPENSE_ACCOUNTS, s.INCOME_ACCOUNTS]),
+            accounts=" ".join([s.Accounts.EXPENSES_P, s.Accounts.INCOME_P]),
             M=True, collapse=True,
             limit="date >= [{} {}] and date < [{} {}]".format(
                 months[start_month_nr], start_year,
@@ -140,8 +144,6 @@ def expenses_post():
         "amount": request.form.get('amount', 0),
         "description": request.form.get('description', "")
     }
-
-    pprint(posting)
 
     ledger_writer.write_expense(posting)
 

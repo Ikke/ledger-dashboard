@@ -1,16 +1,19 @@
 from pprint import pprint
-from flask import get_flashed_messages
+from flask import get_flashed_messages, url_for
+import ledgerdashboard.settings as s
 
 
 class Layout:
     def __init__(self):
         setattr(self, self.__class__.__name__.lower(), 'active')
 
-    def message(self):
+    @staticmethod
+    def message():
         messages = get_flashed_messages(category_filter=['message'])
         return messages[0] if len(messages) else None
 
-    def error(self):
+    @staticmethod
+    def error():
         errors = get_flashed_messages(category_filter=['error'])
         return errors[0] if len(errors) else None
 
@@ -33,7 +36,6 @@ class Dashboard(Layout):
 
 class Expenses(Layout):
     def __init__(self, form_data=None):
-        pprint(form_data)
         if form_data:
             for name, value in form_data.items():
                 setattr(self, name, value)
@@ -41,8 +43,12 @@ class Expenses(Layout):
         if not hasattr(self, 'date'):
             self.date = self.today()
 
+        self.api_expense_accounts_url = url_for('api_accounts', account_filter=s.Accounts.EXPENSES)
+        self.api_accounts_url = url_for('api_accounts')
+
         super().__init__()
 
-    def today(self):
+    @staticmethod
+    def today():
         from datetime import date
         return date.today().strftime("%Y-%m-%d")
