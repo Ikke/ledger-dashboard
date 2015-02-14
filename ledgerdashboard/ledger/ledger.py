@@ -34,7 +34,6 @@ class Ledger:
         for balance in balance_output.strip().split("\n"):
             if not balance:
                 continue
-            print("Balance: " + balance)
             match = pattern.search(balance)
             if match:
                 balances.append((match.group(1), match.group(2), float(match.group(3))))

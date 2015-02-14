@@ -1,4 +1,5 @@
 import datetime
+from dateutil.relativedelta import *
 from ledgerdashboard import app
 from ledgerdashboard.ledger import ledger
 from ledgerdashboard.renderer import LayoutRenderer
@@ -17,6 +18,8 @@ app.secret_key = "%45bkjefkserhjvnjdlkf5$4$5j  k"
 l = ledger.Ledger.new(filename=LEDGER_FILE)
 ledger_writer = ledger.LedgerWriter(LEDGER_FILE)
 
+current_date = datetime.date.today()
+current_datetime = datetime.datetime.now()
 
 @app.route("/")
 def index():
@@ -37,20 +40,26 @@ def index():
         {
             "name": format_account(account),
             'balance': format_amount(balance),
-            "first": account == s.Accounts.LIABILITIES_P
+            "first": account == s.Accounts.EXPENSES_P
         }
         for account, cur, balance
-        in l.balance(accounts=s.Accounts.LIABILITIES_P, limit="date >= [this month]")
+        in l.balance(accounts=s.Accounts.EXPENSES_P, limit="date >= [{}]".format(current_date.strftime("%B")))
     ]
+
+    previous_month = current_datetime - relativedelta(month=1)
 
     layout.expenses_previous_month = [
         {"name": format_account(account), 'balance': format_amount(balance), "first": ":" not in account}
         for account, cur, balance
-        in l.balance(accounts=s.Accounts.LIABILITIES_P, limit="date >= [last month] and date < [this month]")
+        in l.balance(accounts=s.Accounts.EXPENSES_P, limit="date >= [{}] and date < [{}]".format(
+            previous_month.strftime("%B %Y"),
+            current_date.strftime("%B %Y")
+        ))
     ]
 
-    recurring_income = ledger.regular_transactions(
-        l.register(accounts=s.Accounts.INCOME_P)
+    recurring_income = ledger.find_recurring_transactions(
+        l.register(accounts=s.Accounts.INCOME_P),
+        current_datetime
     )
 
     layout.income = [
@@ -62,38 +71,41 @@ def index():
     layout.last_expenses = [
         {'payee': txn['payee'], 'note': txn['note'], 'amount': format_amount(txn['amount'])}
         for txn
-        in l.register(accounts=s.Accounts.LIABILITIES_P)[:-15:-1]
+        in l.register(accounts=s.Accounts.EXPENSES_P)[:-15:-1]
     ]
 
-    recurring_transactions = ledger.regular_transactions(l.register(accounts=s.Accounts.LIABILITIES_P))
-    transactions_this_month = l.register(accounts=s.Accounts.LIABILITIES_P, limit='date >= [this month]')
+    recurring_transactions = ledger.find_recurring_transactions(l.register(accounts=s.Accounts.EXPENSES_P),
+                                                                current_datetime)
+    transactions_this_month = l.register(accounts=s.Accounts.EXPENSES_P,
+                                         limit='date >= [{}]'.format(current_date.strftime("%B")))
 
     for txn in recurring_transactions:
         txn['date'] = datetime.datetime.strptime(txn['date'], '%Y/%m/%d')
 
-    unpayed_transactions = get_unmatched_txns(recurring_transactions, transactions_this_month)
+    # unpayed_transactions = get_unmatched_txns(recurring_transactions, transactions_this_month)
 
-    layout.recurring_transactions = [
+    total = float(0)
+    for txn in recurring_transactions:
+        total += float(txn['amount'])
+
+    recurring_transactions = [
         {
             "payee": txn['payee'],
             "due_in": days_until_next_transaction(txn['date']),
-            "amount": format_amount(txn['amount'])
+            "amount": format_amount(txn['amount'], width=3)
         } for txn
-        in sorted(unpayed_transactions, key=lambda txn: txn['date'].day)
+        in recurring_transactions  # unpayed_transactions
     ]
 
-    total = float(0)
-    for txn in unpayed_transactions:
-        total += float(txn['amount'])
+    layout.recurring_transactions = sorted(recurring_transactions, key=lambda item: item['due_in'])
 
     layout.recurring_transactions_total = format_amount(total)
 
-    today = datetime.date.today()
-    current_month = today.month
+    current_month = current_date.month
 
     flow = []
     for i in range(current_month - 3, current_month + 1):
-        start_year = end_year = today.year
+        start_year = end_year = current_date.year
         start_month_nr = i % 12
         end_month_nr = (i+1) % 12
 
@@ -102,7 +114,6 @@ def index():
         if i > 11:
             end_year += 1
 
-        # print(start_month_nr, start_year, end_month_nr, end_year)
         result = l.register(
             accounts=" ".join([s.Accounts.EXPENSES_P, s.Accounts.INCOME_P]),
             M=True, collapse=True,
@@ -172,8 +183,9 @@ def api_payee():
     return json.dumps(sorted(payees)), 200, {"Content-Type": "application/json"}
 
 
-def format_amount(amount):
-    return "€{: >8.2f}".format(float(amount))
+def format_amount(amount, width=5):
+    width += 3
+    return ("€{: >"+str(width)+".2f}").format(float(amount))
 
 
 def format_account(account):
@@ -189,8 +201,8 @@ def days_until_next_transaction(txn_date: datetime.date):
     :param txn_date: datetime.date
     :return: int
     """
-    future_transaction = datetime.date(txn_date.year, txn_date.month % 12 + 1, txn_date.day)
-    return (future_transaction - datetime.date.today()).days
+
+    return (txn_date + relativedelta(months=1) - current_datetime).days
 
 
 def get_unmatched_txns(haystack, needles):
