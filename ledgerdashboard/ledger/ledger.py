@@ -104,11 +104,11 @@ class LedgerWriter:
             ledger_file.write(posting_text)
 
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 from datetime import datetime
 
 
-def regular_transactions(transactions):
+def find_recurring_transactions(transactions, current_date):
     groups = defaultdict(list)
     for tx in transactions:
         groups[tx['payee']].append(tx)
@@ -118,15 +118,19 @@ def regular_transactions(transactions):
     same_amount = []
     for group in multiple:
         last_txns = sorted(group, key=lambda txn: txn['date'], reverse=False)[-3:]
-        amount = last_txns[0]['amount']
-        same = True
-        for item in last_txns[1:]:
-            if item['amount'] != amount:
-                same = False
-                break
-        if same:
-            last_txn = group[-1]
-            if (datetime.now() - datetime.strptime(last_txn['date'], "%Y/%m/%d")).days < 40:
+
+        amounts = Counter()
+
+        amounts.update(item['amount'] for item in last_txns)
+
+        _, nr_same = amounts.most_common(1)[0]
+
+        if nr_same == 3 or (nr_same == 2 and len(last_txns) == 3):
+            first_txn = last_txns[0]
+            last_txn = last_txns[-1]
+
+            if (current_date - datetime.strptime(last_txn['date'], "%Y/%m/%d")).days < 40 \
+                    and (current_date - datetime.strptime(first_txn['date'], "%Y/%m/%d")).days < 120:
                 same_amount.append(last_txns[-1])
 
     return same_amount
