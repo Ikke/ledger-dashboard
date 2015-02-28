@@ -18,13 +18,20 @@ app.secret_key = "%45bkjefkserhjvnjdlkf5$4$5j  k"
 l = ledger.Ledger.new(filename=LEDGER_FILE)
 ledger_writer = ledger.LedgerWriter(LEDGER_FILE)
 
-current_date = datetime.date.today()
-current_datetime = datetime.datetime.now()
+
+def current_date():
+    return datetime.date.today()
+
+
+def current_datetime():
+    return datetime.datetime.now()
+
 
 @app.route("/")
 def index():
 
     layout = Dashboard()
+    layout.current_date = current_date()
 
     layout.accounts = [
         {"name": format_account(account), 'balance': format_amount(balance)}
@@ -43,23 +50,23 @@ def index():
             "first": account == s.Accounts.EXPENSES_P
         }
         for account, cur, balance
-        in l.balance(accounts=s.Accounts.EXPENSES_P, limit="date >= [{}]".format(current_date.strftime("%B")))
+        in l.balance(accounts=s.Accounts.EXPENSES_P, limit="date >= [{}]".format(current_date().strftime("%B")))
     ]
 
-    previous_month = current_datetime - relativedelta(month=1)
+    previous_month = current_datetime() - relativedelta(month=1)
 
     layout.expenses_previous_month = [
         {"name": format_account(account), 'balance': format_amount(balance), "first": ":" not in account}
         for account, cur, balance
         in l.balance(accounts=s.Accounts.EXPENSES_P, limit="date >= [{}] and date < [{}]".format(
             previous_month.strftime("%B %Y"),
-            current_date.strftime("%B %Y")
+            current_date().strftime("%B %Y")
         ))
     ]
 
     recurring_income = ledger.find_recurring_transactions(
         l.register(accounts=s.Accounts.INCOME_P),
-        current_datetime
+        current_datetime()
     )
 
     layout.income = [
@@ -75,12 +82,12 @@ def index():
     ]
 
     recurring_transactions = ledger.find_recurring_transactions(l.register(accounts=s.Accounts.EXPENSES_P),
-                                                                current_datetime)
+                                                                current_datetime())
     transactions_this_month = l.register(accounts=s.Accounts.EXPENSES_P,
-                                         limit='date >= [{}]'.format(current_date.strftime("%B")))
+                                         limit='date >= [{}]'.format(current_date().strftime("%B")))
 
     for txn in recurring_transactions:
-        txn['date'] = datetime.datetime.strptime(txn['date'], '%Y/%m/%d')
+        txn['date'] = current_datetime().strptime(txn['date'], '%Y/%m/%d')
 
     # unpayed_transactions = get_unmatched_txns(recurring_transactions, transactions_this_month)
 
@@ -101,13 +108,13 @@ def index():
 
     layout.recurring_transactions_total = format_amount(total)
 
-    current_month = current_date.month
+    current_month = current_date().month
 
     flow = []
     for i in range(current_month - 3, current_month + 1):
-        start_year = end_year = current_date.year
+        start_year = end_year = current_date().year
         start_month_nr = i % 12
-        end_month_nr = (i+1) % 12
+        end_month_nr = (i + 1) % 12
 
         if i < 1:
             start_year -= 1
@@ -202,7 +209,7 @@ def days_until_next_transaction(txn_date: datetime.date):
     :return: int
     """
 
-    return (txn_date + relativedelta(months=1) - current_datetime).days
+    return (txn_date + relativedelta(months=1) - current_datetime()).days
 
 
 def get_unmatched_txns(haystack, needles):
