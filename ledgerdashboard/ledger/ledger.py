@@ -13,7 +13,12 @@ class Ledger:
 
     @classmethod
     def new(cls, filename):
-        return Ledger(sh.Command(settings.LEDGER_BIN).bake(_tty_out=False, no_color=True, file=filename), filename=filename)
+        if hasattr(settings, 'LEDGER_BIN'):
+            ledger_bin = settings.LEDGER_BIN
+        else:
+            ledger_bin = sh.which('ledger')
+
+        return Ledger(sh.Command(ledger_bin).bake(_tty_out=False, no_color=True, file=filename), filename=filename)
 
     def accounts(self, account_filter=""):
         result = self.ledger.accounts(account_filter)
