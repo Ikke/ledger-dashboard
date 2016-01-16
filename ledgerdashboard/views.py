@@ -35,22 +35,22 @@ def index():
 
     layout.accounts = [
         {"name": format_account(account), 'balance': format_amount(balance)}
-        for account, cur, balance in l.balance(accounts=s.Accounts.ASSETS_P)
+        for account, cur, balance in l.balance(accounts=s.Accounts.ASSETS_PATTERN)
     ]
 
     layout.debts = [
         {"name": format_account(account), 'balance': format_amount(float(balance) * -1)}
-        for account, cur, balance in l.balance(accounts=s.Accounts.LIABILITIES_P)
+        for account, cur, balance in l.balance(accounts=s.Accounts.LIABILITIES_PATTERN)
     ]
 
     layout.expense_balances = [
         {
             "name": format_account(account),
             'balance': format_amount(balance),
-            "first": account == s.Accounts.EXPENSES_P
+            "first": account == s.Accounts.EXPENSES_PATTERN
         }
         for account, cur, balance
-        in l.balance(accounts=s.Accounts.EXPENSES_P, limit="date >= [{}]".format(current_date().strftime("%B")))
+        in l.balance(accounts=s.Accounts.EXPENSES_PATTERN, limit="date >= [{}]".format(current_date().strftime("%B")))
     ]
 
     previous_month = current_datetime() - relativedelta(month=1)
@@ -58,14 +58,14 @@ def index():
     layout.expenses_previous_month = [
         {"name": format_account(account), 'balance': format_amount(balance), "first": ":" not in account}
         for account, cur, balance
-        in l.balance(accounts=s.Accounts.EXPENSES_P, limit="date >= [{}] and date < [{}]".format(
+        in l.balance(accounts=s.Accounts.EXPENSES_PATTERN, limit="date >= [{}] and date < [{}]".format(
             previous_month.strftime("%B %Y"),
             current_date().strftime("%B %Y")
         ))
     ]
 
     recurring_income = ledger.find_recurring_transactions(
-        l.register(accounts=s.Accounts.INCOME_P),
+        l.register(accounts=s.Accounts.INCOME_PATTERN),
         current_datetime()
     )
 
@@ -78,12 +78,12 @@ def index():
     layout.last_expenses = [
         {'payee': txn['payee'], 'note': txn['note'], 'amount': format_amount(txn['amount'])}
         for txn
-        in l.register(accounts=s.Accounts.EXPENSES_P)[:-15:-1]
+        in l.register(accounts=s.Accounts.EXPENSES_PATTERN)[:-15:-1]
     ]
 
-    recurring_transactions = ledger.find_recurring_transactions(l.register(accounts=s.Accounts.EXPENSES_P),
+    recurring_transactions = ledger.find_recurring_transactions(l.register(accounts=s.Accounts.EXPENSES_PATTERN),
                                                                 current_datetime())
-    transactions_this_month = l.register(accounts=s.Accounts.EXPENSES_P,
+    transactions_this_month = l.register(accounts=s.Accounts.EXPENSES_PATTERN,
                                          limit='date >= [{}]'.format(current_date().strftime("%B")))
 
     for txn in recurring_transactions:
@@ -116,13 +116,14 @@ def index():
         start_month_nr = i % 12
         end_month_nr = (i + 1) % 12
 
+
         if i < 1:
             start_year -= 1
         if i > 11:
             end_year += 1
 
         result = l.register(
-            accounts=" ".join([s.Accounts.EXPENSES_P, s.Accounts.INCOME_P]),
+            accounts=" ".join([s.Accounts.EXPENSES_PATTERN, s.Accounts.INCOME_PATTERN]),
             M=True, collapse=True,
             limit="date >= [{} {}] and date < [{} {}]".format(
                 months[start_month_nr], start_year,
