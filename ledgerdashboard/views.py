@@ -4,7 +4,7 @@ from ledgerdashboard import app
 from ledgerdashboard.ledger import ledger
 from ledgerdashboard.renderer import LayoutRenderer
 from ledgerdashboard.layout import Dashboard, Expenses
-from ledgerdashboard.settings import LEDGER_FILE
+from ledgerdashboard import settings
 import ledgerdashboard.settings as s
 from flask import flash, request
 from pprint import pprint
@@ -13,10 +13,10 @@ months = ["december", "january", "february", "march", "april", "may", "june",
           "july", "august", "september", "october", "november", "december"]
 
 renderer = LayoutRenderer()
-app.secret_key = "%45bkjefkserhjvnjdlkf5$4$5j  k"
+app.secret_key = settings.SECRET_KEY
 
-l = ledger.Ledger.new(filename=LEDGER_FILE)
-ledger_writer = ledger.LedgerWriter(LEDGER_FILE)
+l = ledger.Ledger.new(filename=settings.LEDGER_FILE)
+ledger_writer = ledger.LedgerWriter(settings.LEDGER_FILE)
 
 
 def current_date():
