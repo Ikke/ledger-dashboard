@@ -1,0 +1,20 @@
+#!/usr/bin/python
+
+from termcolor import colored
+import re
+import sys
+
+cyellow = lambda x: colored(x, "yellow", attrs=['bold'])
+cbgreen = lambda x: colored(x, None, "on_green", attrs=["bold"])
+cbred = lambda x: colored(x, None, "on_red", attrs=["bold"])
+
+re_testname = re.compile("FAIL: ([^ ]+)")
+
+t_in = sys.stdin.read()
+
+t_out = t_in.replace("OK", cbgreen("{: ^20}".format("OK")))
+t_out = t_out.replace("FAILED", cbred("{: ^20}".format("FAILED")))
+
+t_out = re_testname.sub("FAIL: {}".format(cyellow(r"\1")), t_out)
+
+print(t_out, end="")
