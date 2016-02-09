@@ -4,6 +4,7 @@ import csv
 from pprint import pprint
 import ledgerdashboard.settings as settings
 import os.path
+import locale
 
 class Ledger:
     def __init__(self, command, filename=""):
@@ -44,7 +45,7 @@ class Ledger:
                 continue
             match = pattern.search(balance)
             if match:
-                balances.append((match.group(1), match.group(2), float(match.group(3))))
+                balances.append((match.group(1), match.group(2), locale.atof(match.group(3))))
 
         return balances
 
