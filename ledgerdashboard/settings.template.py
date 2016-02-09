@@ -13,6 +13,9 @@ PORT = 5000
 ## Random key for securing cookies
 SECRET_KEY= ""
 
+## Your prefered locale (has influence on how numbers are interpreted)
+LOCALE="en_US.UTF-8"
+
 ## Ledger account names
 class Accounts:
     ASSETS = "assets"

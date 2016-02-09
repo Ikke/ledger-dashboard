@@ -8,9 +8,12 @@ from ledgerdashboard import settings
 import ledgerdashboard.settings as s
 from flask import flash, request
 from pprint import pprint
+import locale
 
 months = ["december", "january", "february", "march", "april", "may", "june",
           "july", "august", "september", "october", "november", "december"]
+
+locale.setlocale(locale.LC_ALL, s.LOCALE)
 
 renderer = LayoutRenderer()
 app.secret_key = settings.SECRET_KEY
