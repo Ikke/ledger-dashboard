@@ -3,7 +3,7 @@ import sh
 import csv
 from pprint import pprint
 import ledgerdashboard.settings as settings
-
+import os.path
 
 class Ledger:
     def __init__(self, command, filename=""):
@@ -17,6 +17,9 @@ class Ledger:
             ledger_bin = settings.LEDGER_BIN
         else:
             ledger_bin = sh.which('ledger')
+
+        if not os.path.exists(ledger_bin):
+            raise ValueError("Ledger binary not found at: {}".format(ledger_bin))
 
         return Ledger(sh.Command(ledger_bin).bake(_tty_out=False, no_color=True, file=filename), filename=filename)
 
