@@ -19,6 +19,10 @@ LOCALE="en_US.UTF-8"
 ## The currency that will be shown on the dashboard
 DISPLAY_CURRENCY="USD"
 
+## Filter out transactions not in the display currency
+## By default it tries to convert all the currency to the display currency
+LIMIT_CURRENCY=False
+
 ## Ledger account names
 class Accounts:
     ASSETS = "assets"

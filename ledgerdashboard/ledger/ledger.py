@@ -31,8 +31,13 @@ class Ledger:
     def balance(self, accounts=None, **kwargs):
 
         pattern = re.compile("([A-Za-z0-9:]+) ([A-Z]{3}|[$€£]) *([-0-9.,]+)")
+
+        if settings.LIMIT_CURRENCY:
+            kwargs['limit'] = "commodity=~/{}/".format(settings.DISPLAY_CURRENCY)
+
         balance_output = self._command(
             command="balance",
+            X=settings.DISPLAY_CURRENCY,
             accounts=accounts,
             balance_format="%A %(display_total)\n%/",
             _debug=False,
@@ -50,7 +55,12 @@ class Ledger:
         return balances
 
     def register(self, accounts=None, **kwargs):
-        register = self._command('csv', accounts, **kwargs)
+        cur_limit = ""
+
+        if settings.LIMIT_CURRENCY:
+            cur_limit = "--limit=commodity=~/{}/".format(settings.DISPLAY_CURRENCY)
+
+        register = self._command('csv', accounts, args=[cur_limit], X=settings.DISPLAY_CURRENCY, **kwargs)
         reader = csv.DictReader(register.split("\n"), ["date", "code", "payee", "account", "currency", "amount", "cost", "note"])
 
         return list(reader)
@@ -78,8 +88,7 @@ class Ledger:
             account = account.replace(value, alias)
         return account
 
-    def _command(self, command, accounts=None, _debug=False, **kwargs):
-        args = list()
+    def _command(self, command, accounts=None, args=[], _debug=False, **kwargs):
 
         if accounts:
             args.extend(accounts.split(" "))
