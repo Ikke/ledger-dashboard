@@ -16,6 +16,9 @@ SECRET_KEY= ""
 ## Your prefered locale (has influence on how numbers are interpreted)
 LOCALE="en_US.UTF-8"
 
+## The currency that will be shown on the dashboard
+DISPLAY_CURRENCY="USD"
+
 ## Ledger account names
 class Accounts:
     ASSETS = "assets"

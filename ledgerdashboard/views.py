@@ -164,7 +164,8 @@ def expenses_post():
         "use_source": request.form.get('use_source', "") == "on",
         "source_account": request.form.get('source_account', ""),
         "amount": request.form.get('amount', 0),
-        "description": request.form.get('description', "")
+        "description": request.form.get('description', ""),
+        "currency": settings.DISPLAY_CURRENCY,
     }
 
     ledger_writer.write_expense(posting)
@@ -196,7 +197,7 @@ def api_payee():
 
 def format_amount(amount, width=5):
     width += 3
-    return ("€{: >"+str(width)+".2f}").format(float(amount))
+    return ("{}{: >"+str(width)+".2f}").format(settings.DISPLAY_CURRENCY, float(amount))
 
 
 def format_account(account):

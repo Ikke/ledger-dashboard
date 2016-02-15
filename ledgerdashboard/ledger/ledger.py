@@ -101,7 +101,7 @@ class LedgerWriter:
         if posting['description']:
             posting_text += "    ;{description}\n".format(**posting)
 
-        posting_text += "    {account: <40s}€{amount: >8s}\n".format(**posting)
+        posting_text += "    {account: <40s}{currency}{amount: >8s}\n".format(**posting)
 
         if posting['use_source']:
             posting_text += "    {source_account:}".format(**posting)
