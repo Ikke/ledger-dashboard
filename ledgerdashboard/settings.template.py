@@ -1,5 +1,5 @@
 ## Enable flask debug mode. Don't enable this in production
-#DEBUG = True
+DEBUG = False
 
 ## Path to the binary. Searches PATH by default.
 #LEDGER_BIN = '/path/to/ledger'
